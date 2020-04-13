@@ -23,187 +23,300 @@ private class CreateShopTest: CreateShopViewModelBaseTest {
         describe("Register new shop") {
             
             // MARK: Typing Shop Name Test Case
-            context("Typing Shop Name that not available") {
+            context("Typing shop name and shop name valid") {
                 beforeEach {
                     useCase.checkShopNameAvailability = { _ in
-                       .just(false)
+                       .just(true)
                     }
-                }
-                
-                it("Invalid Shopname, still generate the domain name") {
-                    self.shopNameSubject.onNext("supergadgettt")
-                    self.domainNameValue.assertValue("supergadgettt-4")
-                    self.shopNameError.assertValue(ShopError.notAvailable.message)
-                    self.shopNameErrorIsHidden.assertLastValue(false)
-                }
-            }
-            
-            context("Typing Shop Name that available") {
-                beforeEach {
-                    useCase.checkShopNameAvailability = { _ in
-                        .just(true)
-                    }
-                }
-                
-                it("Valid Shopname, will generate domain name suggestion") {
                     self.shopNameSubject.onNext("asdf")
-                    self.domainNameValue.assertValue("asdf-4")
+                }
+                
+                it("should dsiplay shop name") {
+                    self.shopNameValue.assertValue("asdf")
+                }
+                
+                it("should not show error shop name") {
                     self.shopNameError.assertDidNotEmitValue()
                     self.shopNameErrorIsHidden.assertLastValue(true)
                 }
                 
-                it("Show Error when shop name has less than 3 characters") {
+                it("should generate domain name") {
+                    self.domainNameValue.assertValue("asdf-4")
+                }
+            }
+            
+            context("typing invalid shop name") {
+                beforeEach {
+                    useCase.checkShopNameAvailability = { _ in
+                       .just(false)
+                    }
+                    self.shopNameSubject.onNext("supergadgettt")
+                }
+                
+                it("should display shop name") {
+                    self.shopNameValue.assertValue("supergadgettt")
+                }
+                
+                it("should display error invalid shop name") {
+                    self.shopNameError.assertValue(ShopError.notAvailable.message)
+                    self.shopNameErrorIsHidden.assertLastValue(false)
+                }
+                
+                it("should generate domain name") {
+                    self.domainNameValue.assertLastValue("supergadgettt-4")
+                }
+            }
+            
+            context("Typing shop name less than 3 character") {
+                beforeEach {
+                    useCase.checkShopNameAvailability = { _ in
+                       .just(true)
+                    }
                     self.shopNameSubject.onNext("as")
+                }
+                
+                it("should display shop name") {
                     self.shopNameValue.assertValue("as")
+                }
+                
+                it("should display error shop minimal character") {
                     self.shopNameError.assertValue(ShopError.minCharacter.message)
                     self.shopNameErrorIsHidden.assertLastValue(false)
                 }
                 
-                it("Show Error when shop name start ort end with spacing") {
-                    self.shopNameSubject.onNext(" asd")
-                    self.shopNameValue.assertValue(" asd")
+                it("should generate domain name") {
+                    self.domainNameValue.assertValue("as-4")
+                }
+            }
+            
+            context("typing shop name with start or end using space") {
+                beforeEach {
+                    useCase.checkShopNameAvailability = { _ in
+                       .just(true)
+                    }
+                    self.shopNameSubject.onNext("shop ")
+                }
+                
+                it("should diplay shop name") {
+                    self.shopNameValue.assertValue("shop ")
+                }
+                 
+                it("should display error shop name contain space on it's start or end") {
                     self.shopNameError.assertValue(ShopError.startOrEndWithWhitespace.message)
                     self.shopNameErrorIsHidden.assertLastValue(false)
                 }
                 
-                it("Show Error when shop name contain emoji") {
+                it("should display domain name") {
+                    self.domainNameValue.assertValue("shop -4")
+                }
+            }
+            
+            context("typing shop name with emoji") {
+                beforeEach {
+                    useCase.checkShopNameAvailability = { _ in
+                       .just(true)
+                    }
                     self.shopNameSubject.onNext("as😄d")
+                }
+                
+                it("should displya shop name") {
                     self.shopNameValue.assertValue("as😄d")
+                }
+                
+                it("should display error shop name contains emoji") {
                     self.shopNameError.assertValue(ShopError.containEmoji.message)
                     self.shopNameErrorIsHidden.assertLastValue(false)
                 }
                 
-                it("Show Error when shop name empty") {
+                it("should displya domain name") {
+                    self.domainNameValue.assertValue("as😄d-4")
+                }
+            }
+            
+            context("user delete all shop name") {
+                beforeEach {
+                    useCase.checkShopNameAvailability = { _ in
+                       .just(true)
+                    }
                     self.shopNameSubject.onNext("")
+                }
+                
+                it("should display empty shop name") {
                     self.shopNameValue.assertValue("")
-                    self.shopNameError.assertValue(ShopError.textEmpty.message)
+                }
+                
+                it("should display error shop name was empty") {
+                    self.shopNameError.assertLastValue(ShopError.textEmpty.message)
                     self.shopNameErrorIsHidden.assertLastValue(false)
+                }
+                
+                it("should display domain name") {
+                    self.domainNameValue.assertValue("-4")
                 }
             }
             
             // MARK: Typing Domain Name Test Case
-            context("Typing Domain Name valid") {
-                it("Domain Name Valid") {
-                    self.domainNameSubject.onNext("asdf-4")
-                    self.domainNameValue.assertValue("asdf-4")
+            context("user typing valid domain name") {
+                beforeEach {
+                    self.domainNameSubject.onNext("BermainBersama")
+                }
+                
+                it("should display domain name") {
+                    self.domainNameValue.assertValue("BermainBersama")
+                }
+                
+                it("should not show error domain name not valid") {
                     self.domainNameError.assertValue(nil)
                     self.domainErrorIsHidden.assertLastValue(true)
                 }
             }
             
-            context("Typing Domain Name not valid") {
+            context("user typing not valid domain name") {
                 beforeEach {
                     useCase.checkDomainNameAvailability = { _ in
-                        .just("Domain Name is not valid, please change the domain name")
+                        return .just(ShopError.notValidDomain.message)
                     }
+                    self.domainNameSubject.onNext("tokopedia")
                 }
                 
-                it("Domain Name not Valid") {
-                    self.domainNameSubject.onNext("notValidDomain")
-                    self.domainNameValue.assertValue("notValidDomain")
-                    self.domainNameError.assertValue("Domain Name is not valid, please change the domain name")
+                it("should display domain name") {
+                    self.domainNameValue.assertValue("tokopedia")
+                }
+                
+                it("should show error not valid domain name") {
+                    self.domainNameError.assertValue(ShopError.notValidDomain.message)
                     self.domainErrorIsHidden.assertLastValue(false)
                 }
             }
             
-            context("Typing Domain Name is less than 3 character") {
+            context("user typing domain name less than 3 characters") {
                 beforeEach {
                     useCase.checkDomainNameAvailability = { _ in
-                        .just(ShopError.minCharacter.message)
+                        return .just(ShopError.minCharacter.message)
                     }
+                    self.domainNameSubject.onNext("to")
                 }
                 
-                it("Show Error when domain name has less than 3 characters") {
-                    self.domainNameSubject.onNext("as")
-                    self.domainNameValue.assertValue("as")
+                it("should display domain name") {
+                    self.domainNameValue.assertValue("to")
+                }
+                
+                it("should show error minimal 3 character on domain name") {
                     self.domainNameError.assertValue(ShopError.minCharacter.message)
                     self.domainErrorIsHidden.assertLastValue(false)
                 }
-                
-                it("hide Error when user typing again new domain") {
-                    self.domainNameSubject.onNext("as")
-                    self.domainNameValue.assertValue("as")
-                    self.domainNameError.assertValue(ShopError.minCharacter.message)
-                    self.domainErrorIsHidden.assertLastValue(false)
-                    
+            }
+            
+            context("user typing invalid domain and re-typing new valid domain shop") {
+                beforeEach {
+                    // we set scenario of user get invalid domain
                     useCase.checkDomainNameAvailability = { _ in
-                        .just(nil)
+                        return .just(ShopError.notValidDomain.message)
                     }
+                    self.domainNameSubject.onNext("tokopedia")
                     
-                    self.domainNameSubject.onNext("newShop")
-                    self.domainNameValue.assertLastValue("newShop")
-                    self.domainNameError.assertLastValue(nil)
-                    self.domainErrorIsHidden.assertLastValue(true)
+                    // here we set scenario user re-typing with valid domain
+                    useCase.checkDomainNameAvailability = { _ in
+                        return .just(nil)
+                    }
+                    self.domainNameSubject.onNext("bermainBersama")
+                }
+                
+                it("should display domain name") {
+                    self.domainNameValue.assertValues(["tokopedia", "bermainBersama"])
+                }
+                
+                it("should display error invalid domain and hide after re-typing new valid domain") {
+                    self.domainNameError.assertValues([ShopError.notValidDomain.message, nil])
+                    self.domainErrorIsHidden.assertValues([false, true])
                 }
             }
             
             // MARK: Select City Test Case
-            context("Select City") {
-                it("Show Selected City") {
-                    let selectionCity = City(id: "2", name: "Jakarta")
-                    
-                    self.inputCitySubject.onNext(selectionCity)
-                    self.city.assertValue(selectionCity)
+            context("user select the city") {
+                beforeEach {
+                    self.inputCitySubject.onNext(City(id: "2", name: "Jakarta"))
                 }
                 
-                it("Close the Select City Screen should show error when city is not selected") {
+                it("show selected city name") {
+                    self.city.assertValue(City(id: "2", name: "Jakarta"))
+                }
+            }
+            
+            context("show error when user close select city page without select the city") {
+                beforeEach {
+                    // set selected city to nil
                     self.inputCitySubject.onNext(nil)
+                }
+                
+                it("should show error city is should not empty") {
                     self.cityError.assertValue(ShopError.textEmpty.message)
                 }
-                
-                it("Close the Select City Screen does not show error when city is already selected") {
-                    let selectionCity = City(id: "2", name: "Jakarta")
+            }
+            
+            context("dont show error when user close select city option when user already choose selected city") {
+                beforeEach {
+                    self.inputCitySubject.onNext(City(id: "2", name: "Jakarta"))
                     
-                    // first we select
-                    self.inputCitySubject.onNext(selectionCity)
-                    // and after that we click again select city & cancel it
+                    // nil means user click batal button to close select city page
                     self.inputCitySubject.onNext(nil)
-                    // make sure city has last selection from user
-                    self.city.assertLastValue(selectionCity)
+                }
+                
+                it("city value should has last value") {
+                    self.city.assertLastValue(City(id: "2", name: "Jakarta"))
                 }
             }
             
             // MARK: Select postal code
-            context("Select Postal Code") {
-                it("Show Error City is Required, when click postal code without select the citty first") {
+            context("show error when user select postal and user still not select the city") {
+                beforeEach {
+                    self.inputCitySubject.onNext(nil)
+                    
+                    // means we click the postal code button to open
                     self.postalCodeSubject.onNext(())
-                    self.cityError.assertValue(ShopError.textEmpty.message)
                 }
                 
-                it("Select Postal code after the city is selected") {
-                    let newSelectedCity = City(id: "2", name: "Jakarta")
-                    
-                    // select city
-                    self.inputCitySubject.onNext(newSelectedCity)
-                    self.city.assertValue(newSelectedCity)
-                    
-                    // open postal page
-                    self.postalCodeSubject.onNext(())
-                    
-                    // select postal code
-                    self.postalCodeValueSubject.onNext("4441")
-                    self.postalCode.assertValue("4441")
-                    
-                    // expect no error (selected)
-                    self.postalErrorIsHidden.assertLastValue(true)
+                it("should show error city is required") {
+                    self.cityError.assertLastValue(ShopError.textEmpty.message)
+                }
+            }
+            
+            context("user select postal code after select the city first") {
+                beforeEach {
+                    self.inputCitySubject.onNext(City(id: "2", name: "Jakarta"))
+                    self.postalCodeValueSubject.onNext("4444")
                 }
                 
-                it("Should reset postal code after select a new city"){
-                    // last value city
-                    let currentSelectedCity = City(id: "2", name: "Jakarta")
-                    self.inputCitySubject.onNext(currentSelectedCity)
-                    self.city.assertValue(currentSelectedCity)
+                it("should show selected city") {
+                    self.city.assertValue(City(id: "2", name: "Jakarta"))
+                }
+                
+                it("should show selected postal code") {
+                    self.postalCode.assertValue("4444")
+                }
+                
+                it("should not show error city is required to select") {
+                    self.cityError.assertDidNotEmitValue()
+                    self.cityErrorIsHidden.assertDidNotEmitValue()
+                }
+            }
+            
+            context("user select new city after set the city and the postal") {
+                beforeEach {
+                    self.inputCitySubject.onNext(City(id: "2", name: "Jakarta"))
+                    self.postalCodeValueSubject.onNext("4444")
                     
-                    // insert last value postal
-                    self.postalCodeValueSubject.onNext("1234")
-                    
-                    // new value city
-                    let newSelectedCity = City(id: "1", name: "Bekasi")
-                    self.inputCitySubject.onNext(newSelectedCity)
-                    
-                    // reset postal value to empty & expect no error is show
-                    self.postalCodeValueSubject.onNext(nil)
-                    self.postalErrorIsHidden.assertLastValue(true)
+                    self.inputCitySubject.onNext(City(id: "1", name: "Bekasi"))
+                }
+                
+                it("should show latest city selected") {
+                    self.city.assertLastValue(City(id: "1", name: "Bekasi"))
+                }
+                
+                it("should clear value postal") {
+                    // if value === Postal Code string means its reset to nil value
+                    // get this logic from VM code
+                    self.postalCode.assertLastValue("Postal Code")
                 }
             }
         }

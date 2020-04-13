@@ -26,6 +26,7 @@ internal enum ShopError {
     case notAvailable
     case startOrEndWithWhitespace
     case textEmpty
+    case notValidDomain
     
     public var message: String {
         switch self {
@@ -39,6 +40,8 @@ internal enum ShopError {
             return "Shop name should not end with whitespace"
         case .textEmpty:
             return "This field should not empty"
+        case .notValidDomain:
+            return "Domain Name is not valid, please change the domain name"
         }
     }
 }

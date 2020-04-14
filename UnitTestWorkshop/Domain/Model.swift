@@ -13,6 +13,12 @@ internal struct City: Equatable {
     let name: String
 }
 
+extension City {
+    internal static let bekasi = City(id: "1", name: "Bekasi")
+    internal static let jakarta = City(id: "2", name: "Jakarta")
+    internal static let semarang = City(id: "3", name: "Semarang")
+}
+
 internal let shopNameTaken: [String] = [
     "supergadgettt",
     "tulusjayashop",
@@ -26,6 +32,7 @@ internal enum ShopError {
     case notAvailable
     case startOrEndWithWhitespace
     case textEmpty
+    case notValidDomain
     
     public var message: String {
         switch self {
@@ -39,6 +46,8 @@ internal enum ShopError {
             return "Shop name should not end with whitespace"
         case .textEmpty:
             return "This field should not empty"
+        case .notValidDomain:
+            return "Domain Name is not valid, please change the domain name"
         }
     }
 }

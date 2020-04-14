@@ -37,20 +37,14 @@ internal class CityViewController: UIViewController {
     }
     
     @IBAction private func selectBekasi(_ sender: Any) {
-        let city = City(id: "1", name: "Bekasi")
-        
-        selectCitySubject.onNext(city)
+        selectCitySubject.onNext(.bekasi)
     }
     
     @IBAction private func selectJakarta(_ sender: Any) {
-        let city = City(id: "2", name: "Jakarta")
-        
-        selectCitySubject.onNext(city)
+        selectCitySubject.onNext(.jakarta)
     }
     
     @IBAction private func selectSemarang(_ sender: Any) {
-        let city = City(id: "3", name: "Semarang")
-        
-        selectCitySubject.onNext(city)
+        selectCitySubject.onNext(.semarang)
     }
 }

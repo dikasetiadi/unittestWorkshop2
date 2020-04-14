@@ -13,6 +13,12 @@ internal struct City: Equatable {
     let name: String
 }
 
+extension City {
+    internal static let bekasi = City(id: "1", name: "Bekasi")
+    internal static let jakarta = City(id: "2", name: "Jakarta")
+    internal static let semarang = City(id: "3", name: "Semarang")
+}
+
 internal let shopNameTaken: [String] = [
     "supergadgettt",
     "tulusjayashop",
